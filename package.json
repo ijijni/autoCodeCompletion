@@ -1,0 +1,438 @@
+{
+  "name": "auto-code-completion",
+  "displayName": "Auto Code Completion",
+  "description": "智能AI代码补全测试工具，支持10种编程语言，通过真实代码片段触发GitHub Copilot、Tabnine等AI助手，用于测试和评估AI代码补全功能的准确性与智能化水平",
+  "readme": "README.md",
+  "version": "1.21.0",
+  "publisher": "auto-completion-dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ijijni/autoCodeCompletion"
+  },
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other",
+    "Machine Learning"
+  ],
+  "keywords": [
+    "ai",
+    "copilot",
+    "tabnine",
+    "code completion",
+    "auto completion",
+    "github copilot",
+    "codewhisperer",
+    "智能补全",
+    "代码助手",
+    "多语言"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "autoCompletion",
+          "title": "AI代码补全",
+          "icon": "$(robot)"
+        }
+      ]
+    },
+    "views": {
+      "autoCompletion": [
+        {
+          "type": "webview",
+          "id": "autoCompletion.sidebarView",
+          "name": "控制面板",
+          "icon": "$(dashboard)",
+          "contextualTitle": "AI代码补全控制"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "autoCodeCompletion.start",
+        "title": "Start Auto Completion",
+        "category": "Auto Completion"
+      },
+      {
+        "command": "autoCodeCompletion.stop",
+        "title": "Stop Auto Completion",
+        "category": "Auto Completion"
+      },
+      {
+        "command": "autoCodeCompletion.triggerOnce",
+        "title": "Trigger Completion Once",
+        "category": "Auto Completion"
+      },
+      {
+        "command": "autoCodeCompletion.showStats",
+        "title": "Show Completion Stats",
+        "category": "Auto Completion"
+      },
+      {
+        "command": "autoCodeCompletion.resetDailyStats",
+        "title": "Reset Daily Stats",
+        "category": "Auto Completion"
+      },
+      {
+        "command": "autoCodeCompletion.toggleQA",
+        "title": "Toggle Q&A Panel",
+        "category": "Auto Completion"
+      },
+      {
+        "command": "autoCodeCompletion.acceptSuggestion",
+        "title": "Accept Code Suggestion",
+        "category": "Auto Completion"
+      },
+      {
+        "command": "autoCodeCompletion.previousSuggestion",
+        "title": "Previous Suggestion",
+        "category": "Auto Completion"
+      },
+      {
+        "command": "autoCodeCompletion.nextSuggestion",
+        "title": "Next Suggestion",
+        "category": "Auto Completion"
+      },
+      {
+        "command": "autoCodeCompletion.manualTrigger",
+        "title": "Manual Trigger Completion",
+        "category": "Auto Completion"
+      },
+      {
+        "command": "autoCodeCompletion.showControlPanel",
+        "title": "Show Control Panel",
+        "category": "Auto Completion"
+      },
+      {
+        "command": "autoCodeCompletion.switchStrategy",
+        "title": "切换补全策略",
+        "category": "Auto Completion"
+      },
+      {
+        "command": "autoCodeCompletion.configureStrategy",
+        "title": "配置当前策略",
+        "category": "Auto Completion"
+      },
+      {
+        "command": "autoCodeCompletion.showStrategyStatus",
+        "title": "显示策略状态",
+        "category": "Auto Completion"
+      }
+    ],
+    "configuration": {
+      "title": "自动代码补全",
+      "properties": {
+        "autoCodeCompletion.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "启用自动代码补全"
+        },
+        "autoCodeCompletion.interval": {
+          "type": "number",
+          "default": 20000,
+          "minimum": 15000,
+          "description": "AI补全周期间隔（毫秒）。每个周期包括触发AI建议并接受它们。"
+        },
+        "autoCodeCompletion.maxCompletionsPerDay": {
+          "type": "number",
+          "default": 100,
+          "minimum": 1,
+          "description": "每日最大补全次数"
+        },
+        "autoCodeCompletion.supportedLanguages": {
+          "type": "array",
+          "default": [
+            "javascript",
+            "typescript",
+            "python",
+            "java",
+            "csharp",
+            "cpp",
+            "go",
+            "rust",
+            "php",
+            "kotlin"
+          ],
+          "description": "支持的编程语言"
+        },
+        "autoCodeCompletion.autoCreateFiles": {
+          "type": "boolean",
+          "default": true,
+          "description": "自动创建用于补全的测试文件"
+        },
+        "autoCodeCompletion.aiWaitTime": {
+          "type": "number",
+          "default": 5000,
+          "minimum": 2000,
+          "maximum": 15000,
+          "description": "等待AI内联建议出现的时间（毫秒）。如果AI建议出现缓慢，请增加此值。"
+        },
+        "autoCodeCompletion.avoidVSCodeSuggestions": {
+          "type": "boolean",
+          "default": true,
+          "description": "避免触发VSCode内置建议，仅专注于AI助手"
+        },
+        "autoCodeCompletion.useCodeSnippets": {
+          "type": "boolean",
+          "default": true,
+          "description": "使用文件中的代码片段触发AI补全"
+        },
+        "autoCodeCompletion.snippetMaxLines": {
+          "type": "number",
+          "default": 30,
+          "minimum": 10,
+          "maximum": 2000,
+          "description": "每个代码片段使用的最大行数"
+        },
+        "autoCodeCompletion.enableProjectCodeDetection": {
+          "type": "boolean",
+          "default": true,
+          "description": "启用自动检测并使用项目代码而不是插件片段"
+        },
+        "autoCodeCompletion.maxRetryAttempts": {
+          "type": "number",
+          "default": 3,
+          "minimum": 1,
+          "maximum": 10,
+          "description": "当未检测到AI建议或建议重复时的最大重试次数"
+        },
+        "autoCodeCompletion.projectCodeMaxFiles": {
+          "type": "number",
+          "default": 50,
+          "minimum": 10,
+          "maximum": 200,
+          "description": "扫描代码片段的最大项目代码文件数"
+        },
+        "autoCodeCompletion.projectCodeMaxFileSize": {
+          "type": "number",
+          "default": 51200,
+          "minimum": 10240,
+          "maximum": 204800,
+          "description": "扫描项目代码片段的最大文件大小（字节）（默认：50KB）"
+        },
+        "autoCodeCompletion.customSnippetDirectories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "./code-snippets",
+            "./custom-snippets",
+            "./my-code-templates"
+          ],
+          "description": "加载代码片段的自定义目录。支持相对路径和绝对路径。插件将扫描这些目录中的代码文件作为补全模板。"
+        },
+        "autoCodeCompletion.enableCustomSnippets": {
+          "type": "boolean",
+          "default": true,
+          "description": "启用从customSnippetDirectories中指定的自定义目录加载代码片段"
+        },
+        "autoCodeCompletion.customSnippetPriority": {
+          "type": "string",
+          "enum": [
+            "custom-first",
+            "builtin-first",
+            "custom-only",
+            "builtin-only"
+          ],
+          "default": "custom-first",
+          "description": "使用自定义与内置代码片段的优先级。custom-first：优先自定义片段，builtin-first：优先内置片段，custom-only：仅使用自定义片段，builtin-only：仅使用内置片段"
+        },
+        "autoCodeCompletion.autoFocusOnCompletion": {
+          "type": "boolean",
+          "default": false,
+          "description": "触发代码补全时自动聚焦到补全页面。如果为false，补全将在后台进行而不切换标签页。"
+        },
+        "autoCodeCompletion.completionStrategy": {
+          "type": "string",
+          "default": "fixed",
+          "enum": [
+            "fixed",
+            "timeSlot",
+            "workday",
+            "activity",
+            "projectType",
+            "composite"
+          ],
+          "enumDescriptions": [
+            "固定时间间隔触发补全",
+            "根据一天中的不同时间段调整补全频率",
+            "区分工作日和周末的补全策略",
+            "根据编码活跃度动态调整补全频率",
+            "根据项目类型和文件类型调整补全频率",
+            "组合多种策略，灵活控制补全触发"
+          ],
+          "description": "选择代码补全触发策略，支持多种智能调度模式"
+        },
+        "autoCodeCompletion.strategyConfig": {
+          "type": "object",
+          "default": {},
+          "description": "策略配置参数（根据选择的策略类型配置）",
+          "properties": {
+            "timeSlot": {
+              "type": "object",
+              "properties": {
+                "timeSlots": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "start": { "type": "string" },
+                      "end": { "type": "string" },
+                      "interval": { "type": "number" },
+                      "description": { "type": "string" }
+                    }
+                  }
+                },
+                "defaultInterval": { "type": "number" },
+                "timezone": { "type": "string" }
+              }
+            },
+            "workday": {
+              "type": "object",
+              "properties": {
+                "workdays": {
+                  "type": "object",
+                  "properties": {
+                    "days": { "type": "array", "items": { "type": "string" } },
+                    "interval": { "type": "number" },
+                    "enabled": { "type": "boolean" }
+                  }
+                },
+                "weekends": {
+                  "type": "object",
+                  "properties": {
+                    "days": { "type": "array", "items": { "type": "string" } },
+                    "interval": { "type": "number" },
+                    "enabled": { "type": "boolean" }
+                  }
+                },
+                "holidays": { "type": "array", "items": { "type": "string" } }
+              }
+            },
+            "activity": {
+              "type": "object",
+              "properties": {
+                "inactiveThreshold": { "type": "number" },
+                "activeInterval": { "type": "number" },
+                "inactiveInterval": { "type": "number" },
+                "activityWindow": { "type": "number" },
+                "minEditCount": { "type": "number" }
+              }
+            },
+            "projectType": {
+              "type": "object",
+              "properties": {
+                "projectTypes": { "type": "object" },
+                "defaultInterval": { "type": "number" }
+              }
+            },
+            "composite": {
+              "type": "object",
+              "properties": {
+                "strategies": { "type": "array", "items": { "type": "string" } },
+                "mode": { "type": "string", "enum": ["intersection", "union", "priority"] },
+                "priority": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "autoCodeCompletion.toggleQA",
+        "key": "alt+shift+k",
+        "mac": "alt+shift+k",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "autoCodeCompletion.acceptSuggestion",
+        "key": "tab",
+        "mac": "tab",
+        "when": "editorTextFocus && inlineSuggestionVisible"
+      },
+      {
+        "command": "autoCodeCompletion.previousSuggestion",
+        "key": "alt+oem_4",
+        "mac": "alt+oem_4",
+        "when": "editorTextFocus && inlineSuggestionVisible"
+      },
+      {
+        "command": "autoCodeCompletion.nextSuggestion",
+        "key": "alt+oem_6",
+        "mac": "alt+oem_6",
+        "when": "editorTextFocus && inlineSuggestionVisible"
+      },
+      {
+        "command": "autoCodeCompletion.manualTrigger",
+        "key": "ctrl+enter",
+        "mac": "cmd+enter",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "autoCodeCompletion.showControlPanel",
+        "key": "ctrl+shift+p",
+        "mac": "cmd+shift+p"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "autoCodeCompletion.start"
+        },
+        {
+          "command": "autoCodeCompletion.stop"
+        },
+        {
+          "command": "autoCodeCompletion.triggerOnce"
+        },
+        {
+          "command": "autoCodeCompletion.showStats"
+        },
+        {
+          "command": "autoCodeCompletion.resetDailyStats"
+        },
+        {
+          "command": "autoCodeCompletion.toggleQA"
+        },
+        {
+          "command": "autoCodeCompletion.acceptSuggestion"
+        },
+        {
+          "command": "autoCodeCompletion.previousSuggestion"
+        },
+        {
+          "command": "autoCodeCompletion.nextSuggestion"
+        },
+        {
+          "command": "autoCodeCompletion.manualTrigger"
+        },
+        {
+          "command": "autoCodeCompletion.showControlPanel"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "16.x",
+    "@types/vscode": "^1.74.0",
+    "@vscode/vsce": "^3.6.0",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "unzipper": "^0.12.3"
+  }
+}
